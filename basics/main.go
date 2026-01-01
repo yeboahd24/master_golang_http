@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -48,9 +49,30 @@ func homePageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // extracting from Path
+// /users/
 func userHandler(w http.ResponseWriter, r *http.Request) {
 	id := strings.TrimPrefix(r.URL.Path, "/users/")
 	fmt.Fprintf(w, "User ID: %s", id)
+}
+
+// reading request data
+func requestData(w http.ResponseWriter, r *http.Request) {
+	// /search?q=golang&page=2
+	query := r.URL.Query()
+	search := query.Get("q")
+	page := query.Get("page")
+
+	// headers
+	userAgent := r.Header.Get("User-Agent")
+	contentType := r.Header.Get(("Content-Type"))
+
+	// JSON body
+	var data map[string]any
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		http.Error(w, "Invalid Json", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
 }
 
 func main() {
