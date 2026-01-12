@@ -13,29 +13,25 @@ type User struct {
 	Bio   string
 }
 
-// Schema
-
 var userSchema = z.Struct(z.Shape{
-	"name":  z.String().Min(3, z.Message("Override default message")).Max(10),
+	"name":  z.String().Min(3).Max(10),
 	"email": z.String().Email(),
 	"age":   z.Int().GTE(18),
 	"bio":   z.String().Optional(),
 })
 
-// Schema Validation
-func main(){
+func main() {
 	user := User{
-		Name: "Dominic",
-		Email: "wrongmail.com",
-		Age: 12,
-		Bio: "",
+		Name:  "Dominic",
+		Email: "dominic@gmail.com",
+		Age:   20,
+		Bio:   "",
 	}
 
 	errs := userSchema.Validate(&user)
-	if errs !=nil{
-		for issue : range errs{
-			fmt.Printf("%s: %s\n", z.ZogIssueList(z.Issues.GroupByFlattenedPath()[]))
+	if errs != nil {
+		for _, issue := range errs {
+			fmt.Printf("%s: %s\n", issue.Path, issue.Message)
 		}
 	}
-
 }
