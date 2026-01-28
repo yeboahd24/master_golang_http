@@ -14,27 +14,43 @@ func worker(id int, jobs <-chan int, results chan<- int, wg *sync.WaitGroup) {
 }
 
 // workerPool is a function that will create a pool of workers
+//
+//	func workerPool(jobs <-chan int, results chan<- int, numWorkers int) {
+//		var wg sync.WaitGroup
+//		wg.Add(numWorkers)
+//		for w := 1; w <= numWorkers; w++ {
+//			go worker(w, jobs, results, &wg)
+//		}
+//		wg.Wait()
+//	}
 func workerPool(jobs <-chan int, results chan<- int, numWorkers int) {
 	var wg sync.WaitGroup
 	wg.Add(numWorkers)
 	for w := 1; w <= numWorkers; w++ {
 		go worker(w, jobs, results, &wg)
 	}
-	wg.Wait()
+	// Close resutls when ALL workers are done
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
 }
 
 func main() {
-	jobs := make(chan int, 100)
-	results := make(chan int, 100)
+	jobs := make(chan int, 100)    // Prevent blocking on send
+	results := make(chan int, 100) // Prevent blocking on result write
 
-	go workerPool(jobs, results, 10)
+	workerPool(jobs, results, 10)
 
-	for j := 1; j <= 10; j++ {
-		jobs <- j
-	}
-	close(jobs)
+	// send some jobs
+	go func() {
+		for j := 1; j <= 10; j++ {
+			jobs <- j
+		}
+		close(jobs)
+	}()
 
-	for a := 1; a <= 10; a++ {
-		<-results
+	for r := range results {
+		fmt.Println(r)
 	}
 }
