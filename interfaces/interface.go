@@ -43,10 +43,20 @@ func (m *memoryStorage) Save(key, value string) error {
 	return nil
 }
 
+type redisStorage struct {
+	data map[string]string
+}
+
 // Returns INTERFACE - allows swapping S3, Redis, etc.
 func NewStorage() Storage {
 	return &memoryStorage{data: make(map[string]string)}
 }
+
+// Wrong: Because redisStorage doesn't implement Storage
+// func NewStorage() Storage {
+// 	return &redisStorage{data: make(map[string]string)}
+// }
+//
 
 // ============ SERVICE LAYER ============
 // Concrete struct (returned from constructor)
