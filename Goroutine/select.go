@@ -1,9 +1,14 @@
 package main
 
+import "sync"
+
 func main() {
-	ch1 := make(chan int)
-	ch2 := make(chan int)
-	ch3 := make(chan int)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	wg.Wait()
+	ch1 := make(chan int, 1)
+	ch2 := make(chan int, 1)
+	ch3 := make(chan int, 1)
 
 	go func() {
 		for {
@@ -17,27 +22,16 @@ func main() {
 			}
 		}
 	}()
+	// Receive from channel ch1
 	go func() {
 		for {
 			select {
-			case ch1 <- 4:
-				println("ch1 <- 4")
-			case ch2 <- 5:
-				println("ch2 <- 5")
-			case ch3 <- 6:
-				println("ch3 <- 6")
-			}
-		}
-	}()
-	go func() {
-		for {
-			select {
-			case ch1 <- 7:
-				println("ch1 <- 7")
-			case ch2 <- 8:
-				println("ch2 <- 8")
-			case ch3 <- 9:
-				println("ch3 <- 9")
+			case x := <-ch1:
+				println("x = ", x)
+			case x := <-ch2:
+				println("x = ", x)
+			case x := <-ch3:
+				println("x = ", x)
 			}
 		}
 	}()
