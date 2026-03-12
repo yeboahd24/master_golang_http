@@ -16,7 +16,13 @@ func NewUser(name string) *User {
 	return &User{Name: name}
 }
 
+func f() *int {
+	x := 1
+	return &x
+}
+
 func main() {
 	println(add(1, 2))
 	println(NewUser("John"))
+	println(*f())
 }
